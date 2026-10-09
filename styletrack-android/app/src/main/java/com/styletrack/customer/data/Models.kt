@@ -137,6 +137,27 @@ data class AppNotification(
 )
 
 @Serializable
+data class PayOptions(val enabled: Boolean = false, val methods: List<String> = emptyList())
+
+@Serializable
+data class PayRequest(val method: String)
+
+/** What to do next after starting an online payment: open [redirectUrl] (GCash) or show [qrImage] (QR Ph). */
+@Serializable
+data class PayStarted(
+    val paymentId: Long,
+    val method: String,
+    val status: String = "PENDING",
+    val amount: Double = 0.0,
+    val redirectUrl: String? = null,
+    val qrImage: String? = null,
+    val expiresAt: String? = null,
+)
+
+@Serializable
+data class PayStatus(val status: String = "NONE", val method: String? = null, val expiresAt: String? = null)
+
+@Serializable
 data class UnreadCount(val unread: Long = 0)
 
 @Serializable

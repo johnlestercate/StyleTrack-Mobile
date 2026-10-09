@@ -35,6 +35,15 @@ release builds require HTTPS.
   `POST /api/customers/{id}/app-account` (there is no button for this in the web app yet), and the customer signs in with that.
 - Staff / owner accounts are refused by the app on purpose; they use the web app.
 
+## Paying online (GCash and QR Ph through PayMongo)
+
+Once the salon confirms a booking, its screen shows **Pay with GCash** and **Pay with QR Ph**. GCash opens the GCash
+page in the browser/app; QR Ph shows a code to scan with GCash, Maya or a bank app. The app then waits and the
+booking turns to "Paid" when PayMongo confirms it. The app never holds a PayMongo key and never decides a payment
+succeeded: the backend checks with PayMongo. The buttons only appear when the backend has `PAYMONGO_SECRET_KEY`
+set (see the backend README, "Online payments with PayMongo"). GCash returns to a small "Thank you" web page, so
+tap back to the app (it also notices by itself when you return).
+
 ## Notifications
 
 The backend stores a notification when a booking is accepted, rejected, completed, cancelled or moved.
@@ -55,4 +64,4 @@ app/src/main/java/com/styletrack/customer/
 ## Not included
 
 Appointment reminders before the visit, phone-number verification (OTP), registration rate limiting,
-paying through the app (GCash / QR Ph are recorded by the salon at the counter), and push notifications.
+automatic refunds (refund in the PayMongo dashboard) and push notifications.

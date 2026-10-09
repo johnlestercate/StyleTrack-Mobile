@@ -63,6 +63,15 @@ interface StyleTrackApi {
     @PUT("me/appointments/{id}/reschedule")
     suspend fun reschedule(@Path("id") id: Long, @Body body: RescheduleRequest): Appointment
 
+    @GET("me/payment-options")
+    suspend fun paymentOptions(): PayOptions
+
+    @POST("me/appointments/{id}/pay")
+    suspend fun pay(@Path("id") id: Long, @Body body: PayRequest): PayStarted
+
+    @GET("me/appointments/{id}/online-payment")
+    suspend fun onlinePayment(@Path("id") id: Long): PayStatus
+
     @GET("me/loyalty")
     suspend fun loyalty(): LoyaltyBalance
 

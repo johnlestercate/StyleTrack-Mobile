@@ -21,6 +21,7 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -34,11 +35,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.styletrack.customer.data.Appointment
+import com.styletrack.customer.data.PayStarted
 import com.styletrack.customer.data.userMessage
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.decodeFromString
+import com.styletrack.customer.data.AppJson
 import java.time.LocalDateTime
 import androidx.compose.material3.Tab as TabItem
+
+private fun methodLabel(method: String) = when (method) {
+    "GCASH" -> "GCash"
+    "QRPH" -> "QR Ph"
+    "CASH" -> "cash"
+    else -> method
+}
 
 /** A booking can still be changed while it is open and hasn't started yet. */
 private fun Appointment.canChange() = isOpen && parseDateTime(startTime).isAfter(LocalDateTime.now())
@@ -106,9 +118,15 @@ fun BookingDetailScreen(nav: NavController, id: Long) {
     val snackbar = LocalSnackbar.current
     val scope = rememberCoroutineScope()
     val vm = rememberLoad("booking-$id") { repo.appointment(id) }
+    val payOptions = rememberLoad("pay-options") { repo.payOptions() }
+    val payOptionsState by payOptions.state.collectAsState()
+    val onlinePaymentOn = (payOptionsState as? UiState.Ready)?.data?.enabled == true
     var confirmCancel by remember { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    // the started payment is kept as text so the dialog survives rotating the phone
+    var paymentJson by rememberSaveable { mutableStateOf<String?>(null) }
+    val payment = paymentJson?.let { runCatching { AppJson.decodeFromString<PayStarted>(it) }.getOrNull() }
 
     Column(Modifier.fillMaxSize()) {
         ScreenHeader("Booking", onBack = { nav.popBackStack() })
@@ -145,11 +163,62 @@ fun BookingDetailScreen(nav: NavController, id: Long) {
                     FactRow("Service", peso(a.totalAmount - a.homeServiceFee))
                     if (a.isHomeService) FactRow("Home visit fee", peso(a.homeServiceFee))
                     FactRow("Total", peso(a.totalAmount))
-                    FactRow("Payment", if (a.paymentStatus == "PAID") "Paid" + (a.paymentMethod?.let { " ($it)" } ?: "") else "Pay at the salon")
+                    FactRow(
+                        "Payment",
+                        if (a.paymentStatus == "PAID") "Paid" + (a.paymentMethod?.let { " (${methodLabel(it)})" } ?: "")
+                        else if (onlinePaymentOn) "Not paid yet" else "Pay at the salon",
+                    )
                     if (a.status == "COMPLETED" && a.pointsEarned > 0) FactRow("Points earned", "${a.pointsEarned}")
                 }
 
                 error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+
+                val payable = onlinePaymentOn && a.paymentStatus != "PAID" && (a.status == "ACCEPTED" || a.status == "COMPLETED")
+                if (payable) {
+                    SectionTitle("Pay online")
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Button(
+                            onClick = {
+                                busy = true; error = null
+                                scope.launch {
+                                    try {
+                                        paymentJson = AppJson.encodeToString(repo.startPayment(a.id, "GCASH"))
+                                    } catch (e: CancellationException) {
+                                        throw e
+                                    } catch (e: Exception) {
+                                        error = e.userMessage()
+                                    } finally {
+                                        busy = false
+                                    }
+                                }
+                            },
+                            enabled = !busy,
+                            modifier = Modifier.weight(1f),
+                        ) { Text("Pay with GCash") }
+                        OutlinedButton(
+                            onClick = {
+                                busy = true; error = null
+                                scope.launch {
+                                    try {
+                                        paymentJson = AppJson.encodeToString(repo.startPayment(a.id, "QRPH"))
+                                    } catch (e: CancellationException) {
+                                        throw e
+                                    } catch (e: Exception) {
+                                        error = e.userMessage()
+                                    } finally {
+                                        busy = false
+                                    }
+                                }
+                            },
+                            enabled = !busy,
+                            modifier = Modifier.weight(1f),
+                        ) { Text("Pay with QR Ph") }
+                    }
+                    Text(
+                        "Secure payment by PayMongo. You'll be sent to GCash or shown a QR code to scan.",
+                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
 
                 if (a.canChange()) {
                     Button(onClick = { nav.navigate("reschedule/${a.id}") }, enabled = !busy, modifier = Modifier.fillMaxWidth()) {
@@ -158,6 +227,14 @@ fun BookingDetailScreen(nav: NavController, id: Long) {
                     OutlinedButton(onClick = { confirmCancel = true }, enabled = !busy, modifier = Modifier.fillMaxWidth()) {
                         if (busy) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp) else Text("Cancel booking")
                     }
+                }
+            }
+
+            if (payment != null) {
+                PaymentDialog(a.id, payment) { paid ->
+                    paymentJson = null
+                    vm.reload(quiet = true)
+                    if (paid) scope.launch { snackbar.showSnackbar("Payment received. Thank you!") }
                 }
             }
 

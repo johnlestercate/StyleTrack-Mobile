@@ -97,6 +97,10 @@ class Repository(private val api: StyleTrackApi, private val session: SessionMan
     suspend fun reschedule(id: Long, startTime: String, stylistId: Long?) =
         call { api.reschedule(id, RescheduleRequest(startTime, stylistId)) }
 
+    suspend fun payOptions() = call { api.paymentOptions() }
+    suspend fun startPayment(appointmentId: Long, method: String) = call { api.pay(appointmentId, PayRequest(method)) }
+    suspend fun paymentStatus(appointmentId: Long) = call { api.onlinePayment(appointmentId) }
+
     suspend fun loyalty() = call { api.loyalty() }
     suspend fun loyaltyHistory() = call { api.loyaltyHistory() }.content
     suspend fun recommendations() = call { api.recommendations() }
