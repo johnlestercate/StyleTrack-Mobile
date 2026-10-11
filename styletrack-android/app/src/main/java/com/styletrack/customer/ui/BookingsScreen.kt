@@ -39,8 +39,6 @@ import com.styletrack.customer.data.PayStarted
 import com.styletrack.customer.data.userMessage
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.decodeFromString
 import com.styletrack.customer.data.AppJson
 import java.time.LocalDateTime
 import androidx.compose.material3.Tab as TabItem

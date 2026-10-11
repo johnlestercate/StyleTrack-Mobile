@@ -160,12 +160,12 @@ fun BookScreen(nav: NavController, presetService: Long?, presetStylist: Long?, p
                                 try {
                                     val booked = repo.book(
                                         BookRequest(
-                                            stylistId = stylistId,
-                                            serviceId = serviceId,
-                                            type = if (home) "HOME_SERVICE" else "SALON",
-                                            startTime = wireDateTime(date, LocalTime.parse(chosen)),
-                                            address = if (home) address.trim() else null,
-                                            notes = notes.trim().ifBlank { null },
+                                            stylistId,
+                                            serviceId,
+                                            if (home) "HOME_SERVICE" else "SALON",
+                                            wireDateTime(date, LocalTime.parse(chosen)),
+                                            if (home) address.trim() else null,
+                                            notes.trim().ifBlank { null },
                                         ),
                                     )
                                     snackbar.showSnackbar("Request sent. The salon will confirm it soon.")

@@ -64,6 +64,7 @@ private fun Root(app: StyleTrackApp) {
             AskForNotificationPermission()
             AppNav()
         }
+        else -> {}
     }
 }
 
