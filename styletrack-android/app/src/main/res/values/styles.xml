@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Convention used for every "InfoCard" from the old Compose layer: a MaterialCardView with
+         14dp content padding, a 12dp corner radius and the surface color, optionally clickable. -->
+    <style name="StyleTrack.InfoCard" parent="Widget.Material3.CardView.Filled">
+        <item name="cardCornerRadius">12dp</item>
+        <item name="cardElevation">0dp</item>
+        <item name="cardBackgroundColor">?attr/colorSurface</item>
+        <item name="strokeColor">?attr/colorOutline</item>
+        <item name="strokeWidth">1dp</item>
+    </style>
+</resources>

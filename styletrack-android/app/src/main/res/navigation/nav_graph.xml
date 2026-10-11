@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/home">
+
+    <fragment
+        android:id="@+id/home"
+        android:name="com.styletrack.customer.ui.HomeFragment"
+        android:label="Home" />
+
+    <fragment
+        android:id="@+id/browse"
+        android:name="com.styletrack.customer.ui.BrowseFragment"
+        android:label="Browse" />
+
+    <fragment
+        android:id="@+id/bookings"
+        android:name="com.styletrack.customer.ui.BookingsFragment"
+        android:label="Bookings" />
+
+    <fragment
+        android:id="@+id/rewards"
+        android:name="com.styletrack.customer.ui.RewardsFragment"
+        android:label="Rewards" />
+
+    <fragment
+        android:id="@+id/profile"
+        android:name="com.styletrack.customer.ui.ProfileFragment"
+        android:label="Profile" />
+
+    <fragment
+        android:id="@+id/serviceDetail"
+        android:name="com.styletrack.customer.ui.ServiceDetailFragment"
+        android:label="Service">
+        <argument
+            android:name="serviceId"
+            app:argType="long" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/stylistDetail"
+        android:name="com.styletrack.customer.ui.StylistDetailFragment"
+        android:label="Stylist">
+        <argument
+            android:name="stylistId"
+            app:argType="long" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/book"
+        android:name="com.styletrack.customer.ui.BookFragment"
+        android:label="Book">
+        <argument
+            android:name="serviceId"
+            app:argType="long"
+            android:defaultValue="-1L" />
+        <argument
+            android:name="stylistId"
+            app:argType="long"
+            android:defaultValue="-1L" />
+        <argument
+            android:name="home"
+            app:argType="boolean"
+            android:defaultValue="false" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/bookingDetail"
+        android:name="com.styletrack.customer.ui.BookingDetailFragment"
+        android:label="Booking">
+        <argument
+            android:name="appointmentId"
+            app:argType="long" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/reschedule"
+        android:name="com.styletrack.customer.ui.RescheduleFragment"
+        android:label="Reschedule">
+        <argument
+            android:name="appointmentId"
+            app:argType="long" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/notifications"
+        android:name="com.styletrack.customer.ui.NotificationsFragment"
+        android:label="Notifications" />
+
+</navigation>

@@ -4,7 +4,6 @@ import android.app.Application;
 
 import com.styletrack.customer.data.Api;
 import com.styletrack.customer.data.ApiClient;
-import com.styletrack.customer.data.Repository;
 import com.styletrack.customer.data.RepositoryCore;
 import com.styletrack.customer.data.SessionManager;
 import com.styletrack.customer.data.TokenStore;
@@ -15,7 +14,6 @@ public class StyleTrackApp extends Application {
     private TokenStore tokens;
     private SessionManager session;
     private RepositoryCore repoCore;
-    private Repository repo;
 
     @Override
     public void onCreate() {
@@ -24,7 +22,6 @@ public class StyleTrackApp extends Application {
         session = new SessionManager(tokens);
         Api api = ApiClient.build(session::getToken, session::expired);
         repoCore = new RepositoryCore(api, session, tokens);
-        repo = new Repository(repoCore);
         Notifier.createChannel(this);
     }
 
@@ -36,11 +33,7 @@ public class StyleTrackApp extends Application {
         return session;
     }
 
-    public Repository getRepo() {
-        return repo;
-    }
-
-    /** The Java business-logic layer, for Java callers (e.g. NotificationWorker) that can't use the suspend-based Repository facade. */
+    /** The Java business-logic layer: the sole facade the (now plain-Java/Views) UI layer calls. */
     public RepositoryCore getRepoCore() {
         return repoCore;
     }
